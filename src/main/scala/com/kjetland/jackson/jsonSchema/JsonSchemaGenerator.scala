@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter
 import com.fasterxml.jackson.databind._
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.introspect.{AnnotatedClass, JacksonAnnotationIntrospector}
+import com.fasterxml.jackson.databind.jsontype.NamedType
 import com.fasterxml.jackson.databind.node.{ArrayNode, JsonNodeFactory, ObjectNode}
 import com.kjetland.jackson.jsonSchema.annotations.{JsonSchemaDefault, JsonSchemaDescription, JsonSchemaFormat, JsonSchemaTitle}
 import org.slf4j.LoggerFactory
@@ -516,16 +517,22 @@ class JsonSchemaGenerator
       Option(ac.getAnnotations.get(classOf[JsonTypeInfo])).map {
         jsonTypeInfo =>
           if ( jsonTypeInfo.include() != JsonTypeInfo.As.PROPERTY) throw new Exception("We only support polymorphism using jsonTypeInfo.include() == JsonTypeInfo.As.PROPERTY")
-          if ( jsonTypeInfo.use != JsonTypeInfo.Id.NAME) throw new Exception("We only support polymorphism using jsonTypeInfo.use == JsonTypeInfo.Id.NAME")
-
+//          if ( jsonTypeInfo.use != JsonTypeInfo.Id.NAME) throw new Exception("We only support polymorphism using jsonTypeInfo.use == JsonTypeInfo.Id.NAME")
 
           val propertyName = jsonTypeInfo.property()
 
           // Must find out what this current class should be called
-          val subTypeName: String = objectMapper.getSubtypeResolver.collectAndResolveSubtypesByClass(objectMapper.getDeserializationConfig, ac).asScala.toList
+          val namedType: NamedType = objectMapper.getSubtypeResolver.collectAndResolveSubtypesByClass(objectMapper.getDeserializationConfig, ac).asScala.toList
             .filter(_.getType == _type.getRawClass)
             .find(p => true) // find first
-            .get.getName
+            .get
+
+          val subTypeName:String = jsonTypeInfo.use match {
+            case JsonTypeInfo.Id.NAME => namedType.getName
+            case JsonTypeInfo.Id.CLASS => namedType.getClass.getName
+            case JsonTypeInfo.Id.MINIMAL_CLASS => "." + namedType.getClass.getSimpleName
+            case x => throw new Exception(s"Polymorphism using jsonTypeInfo.use == $x not supported")
+          }
 
           PolymorphismInfo(propertyName, subTypeName)
       }

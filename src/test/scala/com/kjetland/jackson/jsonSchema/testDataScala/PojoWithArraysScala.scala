@@ -1,6 +1,7 @@
 package com.kjetland.jackson.jsonSchema.testDataScala
 
-import com.kjetland.jackson.jsonSchema.testData.{ClassNotExtendingAnything, Parent}
+import com.kjetland.jackson.jsonSchema.testData.ClassNotExtendingAnything
+import com.kjetland.jackson.jsonSchema.testData.polymorphism1.Parent
 
 case class PojoWithArraysScala
 (

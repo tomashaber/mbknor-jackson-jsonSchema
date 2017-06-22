@@ -5,7 +5,6 @@ import java.util.Optional
 import java.util.function.Supplier
 import javax.validation.constraints._
 import scala.collection.JavaConversions._
-
 import com.fasterxml.jackson.annotation.{JsonPropertyDescription, JsonSubTypes, JsonTypeInfo}
 import com.fasterxml.jackson.core.JsonParser.NumberType
 import com.fasterxml.jackson.databind._
@@ -16,6 +15,7 @@ import com.fasterxml.jackson.databind.node.{ArrayNode, JsonNodeFactory, ObjectNo
 import com.kjetland.jackson.jsonSchema.annotations._
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import org.slf4j.LoggerFactory
+import sk.nike.skeleton.annotation.api.GenerateJsonSchema
 
 object JsonSchemaGenerator {
   val JSON_SCHEMA_DRAFT_4_URL = "http://json-schema.org/draft-04/schema#"
@@ -782,6 +782,14 @@ class JsonSchemaGenerator
             // If class is annotated with JsonSchemaDescription, we should add it
             Option(ac.getAnnotations.get(classOf[JsonSchemaDescription])).map(_.value())
               .orElse(Option(ac.getAnnotations.get(classOf[JsonPropertyDescription])).map(_.value))
+              .foreach {
+                description: String =>
+                  thisObjectNode.put("description", description)
+              }
+
+            Option(ac.getAnnotations.get(classOf[GenerateJsonSchema])).map(_.description())
+              .orElse(Option(ac.getAnnotations.get(classOf[GenerateJsonSchema])).map(_.description))
+              .filter(!_.isEmpty)
               .foreach {
                 description: String =>
                   thisObjectNode.put("description", description)

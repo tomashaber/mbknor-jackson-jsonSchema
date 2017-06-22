@@ -4,7 +4,7 @@ import sbtrelease.ReleasePlugin.autoImport.releaseStepCommand
 lazy val commonSettings = Seq(
   organization := "com.kjetland",
   organizationName := "mbknor",
-  scalaVersion := "2.12.1",
+  scalaVersion := "2.11.8",
   crossScalaVersions := Seq("2.10.4", "2.11.8", "2.12.1"),
   publishMavenStyle := true,
   publishArtifact in Test := false,
@@ -44,6 +44,7 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-unchecked", "-deprecation"),
   releaseCrossBuild := true,
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+  resolvers += "Local Maven Repository" at new java.io.File(new java.io.File(Path.userHome.absolutePath.toString, ".m2"), "repository").toURI.toURL.toString,
   scalacOptions in(Compile, doc) ++= Seq(scalaVersion.value).flatMap {
     case v if v.startsWith("2.12") =>
       Seq("-no-java-comments") //workaround for scala/scala-dev#249
@@ -70,7 +71,8 @@ lazy val deps  = Seq(
   "com.fasterxml.jackson.datatype" % "jackson-datatype-jdk8" % jacksonVersion % "test",
   "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % jacksonVersion % "test",
   "joda-time" % "joda-time" % "2.9.4" % "test",
-  "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % jacksonVersion % "test"
+  "com.fasterxml.jackson.datatype" % "jackson-datatype-joda" % jacksonVersion % "test",
+  "sk.nike.libraries.skeleton" % "skeleton-annotation" % "2.461-SNAPSHOT"
 )
 
 lazy val root = (project in file("."))
